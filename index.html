@@ -73,13 +73,14 @@
 
         <div class="filter-group" id="filterGroup">
             <button class="filter-btn active" data-cat="すべて">すべて</button>
-            <!-- <button class="filter-btn" data-cat="自己紹介">1. 自己紹介・基本</button>
+            <button class="filter-btn" data-cat="自己紹介">1. 自己紹介・基本</button>
             <button class="filter-btn" data-cat="学校生活">2. 学校生活</button>
             <button class="filter-btn" data-cat="志望動機">3. 志望動機・理解</button>
             <button class="filter-btn" data-cat="スキル">4. スキル・専門性</button>
             <button class="filter-btn" data-cat="社会性">5. アルバイト・社会性</button>
             <button class="filter-btn" data-cat="マインド">6. 価値観・マインド</button>
-            <button class="filter-btn" data-cat="変化球">7. 変化球・逆質問</button> -->
+            <button class="filter-btn" data-cat="変化球">7. 変化球・逆質問</button>
+            <button class="filter-btn" data-cat="AIに関する質問">8. AIに関する質問</button>
         </div>
 
         <table class="q-table">
@@ -105,6 +106,8 @@
                 <h2 id="p-name" style="margin:0;">候補者名</h2>
                 <div id="p-info" style="margin-top:10px; color:#475569; font-weight:bold;"></div>
             </div>
+            <div class="score-box">判定：S A B C D</div>
+        </div>
         <table class="q-table">
             <thead>
                 <tr><th style="width:100px;">カテゴリ</th><th>質問項目</th><th style="width:250px;">評価・メモ</th><th class="no-print" style="width:40px;"></th></tr>
@@ -209,6 +212,13 @@
         { cat: "変化球", q: "あなたを色に例えると何色ですか？" },
         { cat: "変化球", q: "今日の面接に点数をつけるなら何点ですか？" },
         { cat: "変化球", q: "何か質問はありますか？（逆質問）" }
+
+        // 8. AIに関する質問
+        ,{ cat: "AIに関する質問", q: "AIがコードを書ける時代に、専門学校で基礎（アルゴリズムやデータ構造など）を学ぶ意義は何だと思いますか？" }
+        ,{ cat: "AIに関する質問", q: "「AIに丸投げする人」と「AIを使いこなす人」の差はどこにあると思いますか？" }
+        ,{ cat: "AIに関する質問", q: "「AIに代替されないエンジニア」になるために、今後どのようなスキルを磨きたいですか？" }
+        ,{ cat: "AIに関する質問", q: "日々の学習や制作活動で、生成AI（ChatGPT, GitHub Copilot等）をどのように活用していますか？" }
+        ,{ cat: "AIに関する質問", q: "今後、エンジニアの仕事はAIによってどう変化していくと考えていますか？" }
     ];
 
     let currentFilter = 'すべて';
