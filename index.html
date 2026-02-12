@@ -3,46 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>面接質問セレクト＆検索システム</title>
+    <title>面接質問セレクト＆検索システム（保持機能付）</title>
     <style>
         :root { --primary: #2563eb; --danger: #ef4444; --bg: #f1f5f9; --text: #1e293b; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.5; }
         .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-        
-        /* ステップ表示 */
         .step-container { display: flex; justify-content: space-around; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
         .step { padding: 10px 20px; font-weight: bold; color: #94a3b8; }
         .step.active { color: var(--primary); border-bottom: 3px solid var(--primary); margin-bottom: -2px; }
-
-        /* 設定・検索エリア */
         .config-section { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .search-section { margin-bottom: 20px; position: relative; }
         #searchBar { width: 100%; padding: 15px; border: 2px solid var(--primary); border-radius: 8px; font-size: 16px; box-sizing: border-box; outline: none; }
-        #searchBar:focus { box-shadow: 0 0 10px rgba(37,99,235,0.2); }
         .search-count { position: absolute; right: 15px; top: 15px; color: #64748b; font-size: 14px; }
-
         input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
-
-        /* フィルタボタン */
         .filter-group { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
         .filter-btn { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 20px; cursor: pointer; font-size: 12px; }
         .filter-btn.active { background: #334155; color: white; border-color: #334155; }
-
-        /* テーブル */
         .q-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         .q-table th, .q-table td { border-bottom: 1px solid #e2e8f0; padding: 12px; text-align: left; word-wrap: break-word; font-size: 14px; }
         .q-table tr:hover { background: #f8fafc; }
         .tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold; }
-
-        /* プレビュー */
         #previewArea { display: none; padding: 10px; }
         .preview-header { border-bottom: 3px solid #1e293b; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
         .score-box { border: 2px solid #1e293b; padding: 5px 15px; text-align: center; font-weight: bold; }
-
         .action-bar { position: sticky; bottom: 20px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 12px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; border: 1px solid #e2e8f0; backdrop-filter: blur(4px); }
         .btn-primary { background: var(--primary); color: white; padding: 14px 60px; font-size: 16px; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; }
         .btn-remove { color: var(--danger); border: none; background: none; cursor: pointer; font-size: 20px; }
-
         @media print {
             .no-print { display: none !important; }
             #previewArea { display: block !important; padding: 0; }
@@ -95,7 +81,7 @@
         </table>
 
         <div class="action-bar">
-            <button class="btn btn-primary" onclick="showPreview()">選択した質問を確認する</button>
+            <button class="btn btn-primary" onclick="showPreview()">選択した質問を確認する（<span id="selectedCount">0</span>件）</button>
         </div>
     </div>
 
@@ -121,9 +107,8 @@
 </div>
 
 <script>
-    // 質問データベース（前のやり取りで出た150問相当を網羅）
+    // 質問データベース
     const questions = [
-        // 1. 自己紹介
         { cat: "自己紹介", q: "自己紹介を1分程度でお願いします。" },
         { cat: "自己紹介", q: "あなたの強みは何ですか？" },
         { cat: "自己紹介", q: "逆に、自分の弱み（短所）をどう捉えていますか？" },
@@ -138,8 +123,6 @@
         { cat: "自己紹介", q: "キャリアプランを教えてください。" },
         { cat: "自己紹介", q: "自身の性格について教えてください。" },
         { cat: "自己紹介", q: "自分の何を活かして仕事をしたいですか？" },
-
-        // 2. 学校生活
         { cat: "学校生活", q: "なぜ大学ではなく、今の専門学校を選んだのですか？" },
         { cat: "学校生活", q: "今の専攻を選んだきっかけは何ですか？" },
         { cat: "学校生活", q: "学校生活の中で、最も力を入れて取り組んだことは？" },
@@ -155,8 +138,6 @@
         { cat: "学校生活", q: "学校の設備や環境をどう活用していましたか？" },
         { cat: "学校生活", q: "入学前と現在で、自分の成長を感じる部分はどこですか？" },
         { cat: "学校生活", q: "もし入学時に戻れるとしたら、何をやり直したいですか？" },
-
-        // 3. 志望動機
         { cat: "志望動機", q: "数ある企業の中で、なぜ当社を志望したのですか？" },
         { cat: "志望動機", q: "当社のサービスや製品について、どのような印象を持っていますか？" },
         { cat: "志望動機", q: "同業他社と比較して、当社の魅力はどこにあると思いますか？" },
@@ -173,8 +154,6 @@
         { cat: "志望動機", q: "当社の社風に馴染める自信はありますか？" },
         { cat: "志望動機", q: "給与や待遇について、どのような希望がありますか？" },
         { cat: "志望動機", q: "親はどう思っているのか、就職先に納得していますか？" },
-
-        // 4. スキル
         { cat: "スキル", q: "ポートフォリオ（または作品・成果物）のこだわりを教えてください。" },
         { cat: "スキル", q: "使用できるソフトやツールの習熟度はどのくらいですか？" },
         { cat: "スキル", q: "専門分野において、最近注目している技術やトレンドは？" },
@@ -185,8 +164,6 @@
         { cat: "スキル", q: "現場で働くプロの作品と、自分の作品の差はどこにあると思いますか？" },
         { cat: "スキル", q: "AIの普及について、自分の専門職はどう変わると思いますか？" },
         { cat: "スキル", q: "今、一番習得したいスキルは何ですか？" },
-
-        // 5. 社会性（アルバイト等）
         { cat: "社会性", q: "アルバイトは何をしていましたか？" },
         { cat: "社会性", q: "アルバイトを通じて学んだことは何ですか？" },
         { cat: "社会性", q: "接客（または作業）で、工夫したことはありますか？" },
@@ -197,33 +174,46 @@
         { cat: "社会性", q: "報告・連絡・相談（ホウレンソウ）を徹底できますか？" },
         { cat: "社会性", q: "遅刻や欠勤に対する考え方を教えてください。" },
         { cat: "社会性", q: "誰かに感謝されたエピソードを教えてください。" },
-
-        // 6. マインド
         { cat: "マインド", q: "あなたにとって「働く」とはどういうことですか？" },
         { cat: "マインド", q: "失敗した時、どのように立ち直りますか？" },
         { cat: "マインド", q: "これまでの人生で最大の挫折は何ですか？" },
         { cat: "マインド", q: "プレッシャーを感じる場面では、どう行動しますか？" },
         { cat: "マインド", q: "仕事を通じて、社会にどう貢献したいですか？" },
         { cat: "マインド", q: "「これだけは譲れない」というこだわりはありますか？" },
-
-        // 7. 変化球
         { cat: "変化球", q: "私を笑わせるようなエピソードを一つ教えてください。" },
         { cat: "変化球", q: "無人島に一つだけ持っていくとしたら何ですか？" },
         { cat: "変化球", q: "あなたを色に例えると何色ですか？" },
         { cat: "変化球", q: "今日の面接に点数をつけるなら何点ですか？" },
-        { cat: "変化球", q: "何か質問はありますか？（逆質問）" }
-
-        // 8. AIに関する質問
-        ,{ cat: "AIに関する質問", q: "AIがコードを書ける時代に、専門学校で基礎（アルゴリズムやデータ構造など）を学ぶ意義は何だと思いますか？" }
-        ,{ cat: "AIに関する質問", q: "「AIに丸投げする人」と「AIを使いこなす人」の差はどこにあると思いますか？" }
-        ,{ cat: "AIに関する質問", q: "「AIに代替されないエンジニア」になるために、今後どのようなスキルを磨きたいですか？" }
-        ,{ cat: "AIに関する質問", q: "日々の学習や制作活動で、生成AI（ChatGPT, GitHub Copilot等）をどのように活用していますか？" }
-        ,{ cat: "AIに関する質問", q: "今後、エンジニアの仕事はAIによってどう変化していくと考えていますか？" }
+        { cat: "変化球", q: "何か質問はありますか？（逆質問）" },
+        { cat: "AIに関する質問", q: "AIがコードを書ける時代に、専門学校で基礎を学ぶ意義は何だと思いますか？" },
+        { cat: "AIに関する質問", q: "「AIに丸投げする人」と「AIを使いこなす人」の差はどこにあると思いますか？" },
+        { cat: "AIに関する質問", q: "「AIに代替されないエンジニア」になるために、今後どのようなスキルを磨きたいですか？" },
+        { cat: "AIに関する質問", q: "日々の学習や制作活動で、生成AIをどのように活用していますか？" },
+        { cat: "AIに関する質問", q: "今後、エンジニアの仕事はAIによってどう変化していくと考えていますか？" }
     ];
 
+    // --- ここから重要な修正ロジック ---
+    // 選択された質問を「保存」しておくためのSet (一意な質問文をキーにする)
+    const selectedQuestions = new Set();
     let currentFilter = 'すべて';
 
-    // 質問を描画・検索・フィルタリングするメイン関数
+    // テーブル内のクリックイベントを監視して選択状態を保持
+    document.getElementById('qListBody').addEventListener('change', (e) => {
+        if (e.target.classList.contains('q-check')) {
+            const qText = e.target.dataset.q;
+            if (e.target.checked) {
+                selectedQuestions.add(qText);
+            } else {
+                selectedQuestions.delete(qText);
+            }
+            updateSelectedCount();
+        }
+    });
+
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').innerText = selectedQuestions.size;
+    }
+
     function filterQuestions() {
         const keyword = document.getElementById('searchBar').value.toLowerCase();
         const body = document.getElementById('qListBody');
@@ -238,22 +228,23 @@
         document.getElementById('matchCount').innerText = `${filtered.length}件ヒット`;
 
         filtered.forEach(item => {
+            const isChecked = selectedQuestions.has(item.q) ? "checked" : "";
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="checkbox" class="q-check" data-cat="${item.cat}" data-q="${item.q}"></td>
+                <td><input type="checkbox" class="q-check" data-cat="${item.cat}" data-q="${item.q}" ${isChecked}></td>
                 <td><span class="tag" style="background:${getTagColor(item.cat)}">${item.cat}</span></td>
                 <td style="font-weight:500;">${item.q}</td>
             `;
             body.appendChild(tr);
         });
     }
+    // --- 修正ロジックここまで ---
 
     function getTagColor(cat) {
-        const colors = { "自己紹介": "#3b82f6", "学校生活": "#10b981", "志望動機": "#f59e0b", "スキル": "#8b5cf6", "社会性": "#6366f1", "マインド": "#ec4899", "変化球": "#64748b" };
+        const colors = { "自己紹介": "#3b82f6", "学校生活": "#10b981", "志望動機": "#f59e0b", "スキル": "#8b5cf6", "社会性": "#6366f1", "マインド": "#ec4899", "変化球": "#64748b", "AIに関する質問": "#000" };
         return colors[cat] || "#94a3b8";
     }
 
-    // カテゴリボタンのイベント
     document.getElementById('filterGroup').addEventListener('click', (e) => {
         if (e.target.classList.contains('filter-btn')) {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -263,23 +254,28 @@
         }
     });
 
-    // プレビュー表示
     function showPreview() {
-        const selected = Array.from(document.querySelectorAll('.q-check:checked'));
-        if (selected.length === 0) return alert("質問を選択してください");
+        if (selectedQuestions.size === 0) return alert("質問を選択してください");
         
         document.getElementById('p-name').innerText = (document.getElementById('targetName').value || "候補者未入力") + " 様";
         document.getElementById('p-info').innerText = `${document.getElementById('phase').value} | ${document.getElementById('method').value}`;
         
         const pList = document.getElementById('p-list');
-        pList.innerHTML = selected.map(el => `
-            <tr>
-                <td><span class="tag" style="background:#334155">${el.dataset.cat}</span></td>
-                <td style="font-weight:bold;">${el.dataset.q}</td>
-                <td style="border-bottom: 2px dotted #cbd5e1;"></td>
-                <td class="no-print"><button class="btn-remove" onclick="removeRow(this)">×</button></td>
-            </tr>
-        `).join('');
+        pList.innerHTML = "";
+        
+        // 保存されたSetからデータを復元して表示
+        questions.forEach(item => {
+            if (selectedQuestions.has(item.q)) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="tag" style="background:#334155">${item.cat}</span></td>
+                    <td style="font-weight:bold;">${item.q}</td>
+                    <td style="border-bottom: 2px dotted #cbd5e1;"></td>
+                    <td class="no-print"><button class="btn-remove" onclick="removeSelected('${item.q}', this)">×</button></td>
+                `;
+                pList.appendChild(tr);
+            }
+        });
 
         document.getElementById('selectionPage').style.display = 'none';
         document.getElementById('previewArea').style.display = 'block';
@@ -288,15 +284,22 @@
         window.scrollTo(0,0);
     }
 
-    function removeRow(btn) { btn.closest('tr').remove(); }
+    // プレビュー画面での削除もSetと連動
+    function removeSelected(qText, btn) {
+        selectedQuestions.delete(qText);
+        btn.closest('tr').remove();
+        updateSelectedCount();
+        filterQuestions(); // 元のリストのチェック状態も更新しておく
+    }
+
     function backToSelection() {
         document.getElementById('selectionPage').style.display = 'block';
         document.getElementById('previewArea').style.display = 'none';
         document.getElementById('st2').classList.remove('active');
         document.getElementById('st1').classList.add('active');
+        filterQuestions(); // 戻った時に最新の状態を表示
     }
 
-    // 初期実行
     filterQuestions();
 </script>
 </body>
